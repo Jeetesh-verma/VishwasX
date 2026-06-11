@@ -1,6 +1,7 @@
 import os
 import uuid
 import base64
+import json
 import hashlib
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
@@ -39,21 +40,20 @@ async def lifespan(app: FastAPI):
     global db_client
     print("Connecting to Firebase Workspace...")
     try:
-        # Option 1: Credentials JSON provided as base64-encoded env var (for Render/cloud)
+        # 1) Try loading from base64-encoded JSON env var (used in cloud deployments like Render)
         cred_json_b64 = os.getenv("FIREBASE_CREDENTIALS_JSON")
         if cred_json_b64:
-            import json
-            cred_json = json.loads(base64.b64decode(cred_json_b64).decode("utf-8"))
-            cred = credentials.Certificate(cred_json)
+            cred_dict = json.loads(base64.b64decode(cred_json_b64).decode("utf-8"))
+            cred = credentials.Certificate(cred_dict)
             firebase_admin.initialize_app(cred)
-            print("Connected to Firebase using FIREBASE_CREDENTIALS_JSON env var.")
+            print("Connected to Firebase using FIREBASE_CREDENTIALS_JSON env variable.")
         else:
-            # Option 2: Credentials file path (for local development)
-            cred_path = os.getenv("FIREBASE_CREDENTIALS_PATH", "firebase-credentials.json")
+            # 2) Fall back to file-based credentials (local development)
+            cred_path = os.getenv("FIREBASE_CREDENTIALS_PATH", "firebase-credentials.json.json")
             if os.path.exists(cred_path):
                 cred = credentials.Certificate(cred_path)
                 firebase_admin.initialize_app(cred)
-                print("Connected to Firebase using credentials file.")
+                print(f"Connected to Firebase using credentials file: {cred_path}")
             else:
                 firebase_admin.initialize_app()
                 print("Connected to Firebase using default credentials.")
