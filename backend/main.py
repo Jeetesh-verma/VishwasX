@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI):
             print("Connected to Firebase using FIREBASE_CREDENTIALS_JSON env variable.")
         else:
             # 2) Fall back to file-based credentials (local development)
-            cred_path = os.getenv("FIREBASE_CREDENTIALS_PATH", "firebase-credentials.json.json")
+            cred_path = os.getenv("FIREBASE_CREDENTIALS_PATH", "firebase-credentials.json")
             if os.path.exists(cred_path):
                 cred = credentials.Certificate(cred_path)
                 firebase_admin.initialize_app(cred)
