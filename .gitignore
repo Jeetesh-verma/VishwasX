@@ -47,6 +47,9 @@ eggs/
 lib/
 lib64/
 parts/
+
+# Exception: Keep frontend source lib
+!frontend/src/lib/
 sdist/
 var/
 wheels/
