@@ -39,15 +39,16 @@ async def lifespan(app: FastAPI):
     global db_client
     print("Connecting to Firebase Workspace...")
     try:
-        # Support credentials via base64-encoded JSON env var (for cloud deployments like Render)
-        firebase_creds_b64 = os.getenv("FIREBASE_CREDENTIALS_JSON")
-        if firebase_creds_b64:
-            import json as _json
-            creds_dict = _json.loads(base64.b64decode(firebase_creds_b64).decode("utf-8"))
-            cred = credentials.Certificate(creds_dict)
+        # Option 1: Credentials JSON provided as base64-encoded env var (for Render/cloud)
+        cred_json_b64 = os.getenv("FIREBASE_CREDENTIALS_JSON")
+        if cred_json_b64:
+            import json
+            cred_json = json.loads(base64.b64decode(cred_json_b64).decode("utf-8"))
+            cred = credentials.Certificate(cred_json)
             firebase_admin.initialize_app(cred)
-            print("Connected to Firebase using base64 credentials env var.")
+            print("Connected to Firebase using FIREBASE_CREDENTIALS_JSON env var.")
         else:
+            # Option 2: Credentials file path (for local development)
             cred_path = os.getenv("FIREBASE_CREDENTIALS_PATH", "firebase-credentials.json")
             if os.path.exists(cred_path):
                 cred = credentials.Certificate(cred_path)
